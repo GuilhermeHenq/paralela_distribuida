@@ -22,17 +22,32 @@ void printar_matriz(int *matrix, int rows, int cols) {
 }
 
 int main(int argc, char **argv) {
+
+    srand(time(NULL)); // Inicialização do gerador de números aleatórios com uma semente baseada no tempo atual
+
+    MPI_Init(&argc, &argv);
     if (argc != 3) {
         fprintf(stderr, "Uso: %s <linhas matriz1> <colunas matriz2>\n", argv[0]);
         MPI_Finalize();
-        return 1;
+        return 0;
     }
 
     int matrix1_rows = atoi(argv[1]); // Número de linhas da matriz 1
     int matrix2_cols = atoi(argv[2]); // Número de colunas da matriz 2
 
     // é criado uma linha de condição, a qual é atribuido o valor de um dos argumentos passados.
-    int condicion_rows = matrix1_rows;
+    int condicion_rows;
+
+    // é criado uma variavel escolhe para decidir qual dos dois valores passados vai ser usado.
+    int escolhe = rand() % 2;
+    //printf("Valor de escolhe: %d\n", escolhe);
+    if (escolhe == 0) {
+    condicion_rows = matrix1_rows;
+    //printf("Entrou na primeira condição.\n");
+    } else if (escolhe == 1) {
+    condicion_rows = matrix2_cols;
+    //printf("Entrou na segunda condição.\n");
+    }
 
     int matrix1_cols = condicion_rows; // Número de colunas da matriz 1
     int matrix2_rows = condicion_rows; // Número de linhas da matriz 2
@@ -40,7 +55,7 @@ int main(int argc, char **argv) {
 
     int rank, size;
 
-    MPI_Init(&argc, &argv);
+    //MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
