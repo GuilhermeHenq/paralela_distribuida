@@ -1,3 +1,12 @@
+/*
+Faça um programa no MPI que calcule a multiplicação entre duas matrizes.
+A quantidade de elementos das linhas da 1ª matriz e de elementos das colunas da 2ª matriz deve ser passado por parâmetro na linha de execução. Cada linha da matriz deve ser processada por um processo.
+
+As matrizes devem ser geradas pelo processo raiz, e os resultados devem ser enviados também para o processo raiz.
+
+Guilherme Henrique Pereira Serafini
+Luca Ferro Oliveira
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -25,9 +34,17 @@ int main(int argc, char **argv) {
 
     srand(time(NULL)); // Inicialização do gerador de números aleatórios com uma semente baseada no tempo atual
 
+    int rank, size;
+
     MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // verifica a quantidade de argumentos passados se esta correta 
     if (argc != 3) {
-        fprintf(stderr, "Uso: %s <linhas matriz1> <colunas matriz2>\n", argv[0]);
+        if (rank == 0) {
+            fprintf(stderr, "\nUso: %s <linhas matriz1> <colunas matriz2>\n\n", argv[0]);
+        }
         MPI_Finalize();
         return 0;
     }
@@ -35,34 +52,25 @@ int main(int argc, char **argv) {
     int matrix1_rows = atoi(argv[1]); // Número de linhas da matriz 1
     int matrix2_cols = atoi(argv[2]); // Número de colunas da matriz 2
 
-    // é criado uma linha de condição, a qual é atribuido o valor de um dos argumentos passados.
+    // é criado uma linha de condição, a qual é atribuido o valor de um dos argumentos ja passados
     int condicion_rows;
 
     // é criado uma variavel escolhe para decidir qual dos dois valores passados vai ser usado.
     int escolhe = rand() % 2;
-    //printf("Valor de escolhe: %d\n", escolhe);
     if (escolhe == 0) {
     condicion_rows = matrix1_rows;
-    //printf("Entrou na primeira condição.\n");
     } else if (escolhe == 1) {
     condicion_rows = matrix2_cols;
-    //printf("Entrou na segunda condição.\n");
     }
 
     int matrix1_cols = condicion_rows; // Número de colunas da matriz 1
     int matrix2_rows = condicion_rows; // Número de linhas da matriz 2
 
 
-    int rank, size;
-
-    //MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
     //verifica se o numerod de processos é igual ao numero de linhas da matriz 1
     if (size != matrix1_rows) {
         if (rank == 0) {
-            printf("\nO número de processos deve ser igual ao número de linhas da matriz 1: (%d linhas)\n\n", matrix1_rows);
+            printf("\nO número de processos deve ser igual ao número de linhas da matriz A: (%d linhas)\n\n", matrix1_rows);
         }
         MPI_Finalize();
         return 0;
@@ -81,7 +89,6 @@ int main(int argc, char **argv) {
     }
 
     
-
     //transmite a matriz 2 para todos os processos
     MPI_Bcast(matrix2, matrix2_cols * matrix2_rows, MPI_INT, 0, MPI_COMM_WORLD);
 
